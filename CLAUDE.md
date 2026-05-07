@@ -1,0 +1,164 @@
+# Claude Repo Notes
+
+This file is the Claude-facing quick reference for this repository.
+If this file and `AGENTS.md` diverge, follow `AGENTS.md`.
+
+- [Agent Operating Manual](#agent-operating-manual)
+  - [Primary Model](#primary-model)
+  - [Work Modes](#work-modes)
+    - [Strict Mode (default)](#strict-mode-default)
+    - [Yolo Mode (explicit opt-in)](#yolo-mode-explicit-opt-in)
+  - [Mandatory Development Flow (Strict)](#mandatory-development-flow-strict)
+  - [Naming and Comments](#naming-and-comments)
+    - [Naming rules](#naming-rules)
+    - [Preferred style](#preferred-style)
+    - [Comments](#comments)
+  - [Testing Policy](#testing-policy)
+  - [Tooling Quick Reference](#tooling-quick-reference)
+    - [OpenSpec](#openspec)
+    - [beads (`br`) and beads viewer (`bv`)](#beads-br-and-beads-viewer-bv)
+    - [sem](#sem)
+    - [ast-grep (`sg`)](#ast-grep-sg)
+    - [When deploying subagents that modify the codebase](#when-deploying-subagents-that-modify-the-codebase)
+    - [When subagents have completed their work (primary/orchestrator)](#when-subagents-have-completed-their-work-primaryorchestrator)
+    - [mise](#mise)
+  - [Workspace Hygiene](#workspace-hygiene)
+  - [Session Completion Protocol](#session-completion-protocol)
+  <!--toc:end-->
+
+- Strict Mode by default.
+- OpenSpec by default.
+- `br` always for task tracking.
+- `mise` always for tools/tasks/envs.
+- `sg` for code search, not plain grep.
+- `sem diff` whenever possible for review.
+- GitButler instead of `jj`.
+
+## Conditional reminders
+
+These blocks sharpen task-specific behavior. `AGENTS.md` remains the source of
+truth if anything here is incomplete.
+
+<important if="you are starting work, planning, or updating specs">
+- OpenSpec first unless the human explicitly says `Full Yolo`.
+- Encode execution order and dependencies in `br` before implementation.
+- Default to Strict Mode and bounded fan-out.
+</important>
+
+<important if="you are writing or modifying code">
+- Use TDD: red -> green -> refactor.
+- Start with clear names, interfaces, and docstrings that fit repo conventions.
+- Use smaller subagents on separable workstreams.
+</important>
+
+<important if="you are writing or modifying tests">
+- Test real behavior, not mocked behavior under test.
+- Aim for unit, integration, and end-to-end coverage on touched behavior.
+- Clean logs and deterministic output are part of passing.
+</important>
+
+<important if="you are reviewing, verifying, or handing off work">
+- Prefer `sem diff` over plain text diffs when possible.
+- Run compressed verification during iteration and full verification before handoff.
+- Report the actual verification state, not the intended one.
+</important>
+
+<important if="you are touching branches, commits, or git status">
+- Use `but`, not `git` or `jj`, for repo version-control workflows.
+- Hidden tool directories can churn during normal operation; confirm before escalating routine `.beads/`, `.entire/`, `.trunk/`, `.mise/`, or `.tools/` changes.
+- Never bypass hooks or rewrite history without explicit approval.
+</important>
+
+## Preferred Execution Order
+
+1. understand intent
+2. update OpenSpec (unless Full Yolo)
+3. create/update `br` tasks and dependencies
+4. plan and parallelize
+5. fan out bounded work to smaller models/subagents
+6. TDD red -> green -> refactor
+7. run compressed verification during iteration
+8. run full verification before handoff
+
+## Mode Rules
+
+### Strict Mode
+
+- Human approval before implementation.
+- Full spec discipline.
+- Full TDD and verification discipline.
+
+### Yolo Mode
+
+- Must be explicitly requested.
+- Keeps `br`, TDD, and verification.
+- Reduces ceremony, not quality.
+
+### Full Yolo
+
+- Must be explicitly requested by name.
+- May skip OpenSpec.
+- Still keeps `br`, tests, and verification.
+
+## Tool Quick Reference
+
+### `br`
+
+- `br ready` — find unblocked work
+- `br create "..."` — create task
+- `br show <id>` — inspect task
+- `br update <id> --status in_progress` — claim work
+- `br dep add <issue> <depends-on>` — encode dependency
+- `br close <id>` — close task
+- `br sync --flush-only` — export bead data
+
+### `bv`
+
+- Use to inspect graph shape, blockers, and the critical path.
+
+### OpenSpec
+
+- Use first for spec-driven work unless in Full Yolo.
+
+### `sem`
+
+- Prefer `sem diff` over `git diff` for code review.
+
+### `sg`
+
+- Use for code search and structural rewrites.
+- Only use plain-text grep for docs, logs, and prose.
+
+### `mise`
+
+- `mise install` — sync toolchain
+- `mise run <task>` — run project task
+- `mise tasks ls` — inspect available tasks
+
+### `linctl`
+
+- Use for human/team reporting and Linear workflows.
+- Do not use it as a replacement for `br`.
+
+### `entire`
+
+- `entire enable` at project start if not already enabled.
+
+### GitButler
+
+- Preferred branch orchestration model here.
+- No `jj` workspaces, rebases, or parallelize flows.
+
+## Workspace Hygiene
+
+- dependency changes
+- CI/release changes
+- security/auth changes
+- migrations or data-shape changes
+- destructive git actions
+- weakening test or review gates
+
+## Planning Helpers
+
+- If `agent-brief` or `robots` exists in the active harness, use them for deeper planning and fan-out.
+- If they do not exist, proceed with the repo workflow above.
