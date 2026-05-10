@@ -146,3 +146,13 @@ vite.config.ts.timestamp-*
 # Temporary agent artifacts
 scratchpad/*
 !scratchpad/.gitkeep
+
+# Bootstrap runtime data
+.mise/
+.tools/
+.entire/
+.jj/
+.beads/dolt-server.*
+scratchpad/*
+!scratchpad/.gitkeep
+# End bootstrap runtime data
