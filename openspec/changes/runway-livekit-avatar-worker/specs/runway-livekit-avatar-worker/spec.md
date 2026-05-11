@@ -21,3 +21,49 @@ The system SHALL provide the `runway-livekit-avatar-worker` capability: A separa
 - **WHEN** the tracer bullet fails during hackathon operation
 - **THEN** the operator can fall back to the previous completed slice or documented manual path
 - **AND** the system does not require unsupported Discord-native video automation
+
+### Requirement: Run a Python-first Runway AvatarSession worker
+
+The system SHALL provide a Python-first worker path for starting Runway
+`AvatarSession` instances in the same LiveKit room as the Hermes transport.
+
+#### Scenario: Worker validates required configuration
+
+- **WHEN** the worker starts
+- **THEN** it validates LiveKit connection settings, Runway API secret,
+  configured avatar ID, avatar participant identity, and avatar participant name
+- **AND** validation failures produce actionable errors without printing secret
+  values
+
+#### Scenario: Worker joins the target room
+
+- **WHEN** the worker receives a room name and authorized worker credentials
+- **THEN** it joins that room as the avatar worker path
+- **AND** it uses the configured `runway-avatar` participant identity for the
+  published avatar participant unless overridden by configuration
+
+#### Scenario: Runway AvatarSession publishes media
+
+- **WHEN** the worker starts a Runway `AvatarSession` for the configured Hermes
+  avatar ID
+- **THEN** the LiveKit room contains a `runway-avatar` participant
+- **AND** that participant publishes an avatar video track visible to the web
+  stage
+
+### Requirement: Prevent leaked avatar sessions and worker processes
+
+The worker SHALL enforce explicit cleanup paths so LiveKit rooms, worker
+processes, and Runway sessions do not leak during hackathon retries.
+
+#### Scenario: Stop request cleans up the worker
+
+- **WHEN** the session is stopped by command, API call, or local operator action
+- **THEN** the worker stops the avatar session and leaves the LiveKit room
+- **AND** subsequent status reports show the session as stopped or expired
+
+#### Scenario: Signals and duration limits are handled
+
+- **WHEN** the worker receives `SIGINT` or `SIGTERM`, or reaches the configured
+  maximum duration
+- **THEN** it exits cleanly after releasing LiveKit and Runway resources
+- **AND** the cleanup path is safe to run more than once

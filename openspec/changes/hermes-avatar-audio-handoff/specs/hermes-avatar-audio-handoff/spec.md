@@ -21,3 +21,54 @@ The system SHALL provide the `hermes-avatar-audio-handoff` capability: A vertica
 - **WHEN** the tracer bullet fails during hackathon operation
 - **THEN** the operator can fall back to the previous completed slice or documented manual path
 - **AND** the system does not require unsupported Discord-native video automation
+
+### Requirement: Preserve Hermes as the only response and tool brain
+
+The handoff SHALL make the avatar speak or animate from Hermes output without
+letting the avatar path generate unrelated answers.
+
+#### Scenario: Hermes final output drives the avatar turn
+
+- **WHEN** Hermes completes a user turn with final assistant text or a TTS
+  artifact
+- **THEN** the handoff relays that Hermes-owned output to the selected
+  Runway/LiveKit avatar path
+- **AND** the avatar output remains tied to the same Hermes session and turn
+
+#### Scenario: Avatar path does not answer independently
+
+- **WHEN** the avatar worker needs text, audio, context, or persona data
+- **THEN** it uses the Hermes session summary and Hermes response events
+- **AND** it does not run a separate LLM response that can diverge from Hermes
+  context or tool authorization
+
+### Requirement: Select and document the first workable audio route
+
+The handoff SHALL determine whether the MVP uses Hermes text to worker TTS,
+Hermes TTS artifacts, or a deferred LiveKit-native AgentSession route.
+
+#### Scenario: Audio route is selected from verified behavior
+
+- **WHEN** the team evaluates Runway and LiveKit avatar input options
+- **THEN** the chosen route is based on a verified same-turn spike
+- **AND** unsupported routes are documented as deferred or failed with evidence
+
+#### Scenario: Canonical audio avoids echo
+
+- **WHEN** both Discord and LiveKit/avatar audio paths could be audible
+- **THEN** the implementation or runbook identifies the canonical audience audio
+  source
+- **AND** the default MVP keeps Discord Hermes bot audio canonical and shared
+  web-stage audio muted unless intentionally enabled
+
+### Requirement: Mirror captions and status for congruence
+
+The handoff SHALL provide captions and status that make the avatar visibly
+congruent with Hermes.
+
+#### Scenario: Same-turn caption appears with avatar output
+
+- **WHEN** the avatar speaks or animates for a Hermes turn
+- **THEN** the web stage displays matching Hermes response text or a concise
+  status message
+- **AND** the status makes clear that Hermes is the source of truth
