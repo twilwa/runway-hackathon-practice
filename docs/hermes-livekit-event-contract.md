@@ -1,137 +1,50 @@
-# Hermes LiveKit Event Contract
+# Hermes LiveKit data-channel event contract (PR #3894)
 
-This document describes the event contract for Hermes LiveKit transport events.
+**Verification:** `verified from PR #3894 code` — derived from
+`vendor/hermes-agent-livekit/gateway/platforms/livekit.py` (`_publish_agent_event` and call sites).
+Runtime smoke can add a second line `verified from runtime smoke` once `scripts/m1-hermes-livekit-smoke.sh`
+has been executed against a real LiveKit project.
 
-## Event Format
+## Wire format (authoritative)
 
-Events are emitted by the Hermes gateway in the following format:
+Hermes publishes **JSON** on the LiveKit **data channel** using `local_participant.publish_data` with **no topic**
+(default / empty topic). Each message is UTF-8 JSON:
 
-```
-agent:<event_type> <json_payload>
-```
-
-or
-
-```
-hermes.<event_type> <json_payload>
-```
-
-## Event Types
-
-### agent:thinking
-
-Emitted when Hermes is processing a user input.
-
-**Example:**
-```
-agent:thinking {"thought": "Processing user input..."}
-```
-
-**Payload:**
-```typescript
+```json
 {
-  thought: string;
+  "type": "<event_type>",
+  "payload": { }
 }
 ```
 
-### agent:speaking
+- `type` is the full string sent from Python (for example `agent:user-transcript`).
+- `payload` is an object; when omitted in code it becomes `{}`.
 
-Emitted when Hermes is generating or speaking a response.
+This is **not** the `agent:<name> <json>` log-line format; that format appears only in helper/tests in this repo.
 
-**Example:**
-```
-agent:speaking {"text": "Hello there!"}
-```
+## Assistant / UI lifecycle (`agent:*`)
 
-**Payload:**
-```typescript
-{
-  text: string;
-}
-```
+| `type` | When emitted | `payload` keys (from code) |
+|--------|----------------|----------------------------|
+| `agent:listening-start` | Participant speech detected / buffering | `identity` (string) |
+| `agent:listening-stop` | End of listening segment or cleanup | `identity` (string) |
+| `agent:user-transcript` | After STT returns non-empty text | `transcript`, `final` (boolean), `identity` |
+| `agent:thinking-start` | Immediately before `handle_message` / LLM turn | `{}` (no second argument in call) |
+| `agent:agent-transcript` | After assistant text is sent on `hermes-chat` topic | `transcript`, `final` |
+| `agent:speaking-start` | Before TTS PCM frames are streamed to the room | `{}` |
+| `agent:speaking-stop` | After TTS playback, or on error path before return | `{}` |
 
-### agent:tool
+## Separate channel: `hermes-chat`
 
-Emitted when Hermes calls a tool.
+`send()` publishes **raw text bytes** (not the JSON envelope above) with `topic="hermes-chat"` for chat-style clients.
+The same `send` path then emits `agent:agent-transcript` as a mirror for conversation UIs.
 
-**Example:**
-```
-agent:tool {"name": "search", "args": {"query": "test"}}
-```
+## Consumer notes
 
-**Payload:**
-```typescript
-{
-  name: string;
-  args: Record<string, unknown>;
-}
-```
+1. Parse incoming `DataPacket` / data messages as JSON when possible; require `type` + `payload`.
+2. Treat unknown `type` values as forward-compatible (ignore or log).
+3. Do not assume `agent:thinking` / `agent:speaking` / `agent:tool` strings — they are **not** emitted by this LiveKit adapter in the vendored tree; tests that used those names were illustrative only.
 
-### hermes.lifecycle
+## Source references
 
-Emitted when Hermes lifecycle state changes.
-
-**Example:**
-```
-hermes.lifecycle {"state": "ready"}
-```
-
-**Payload:**
-```typescript
-{
-  state: 'ready' | 'processing' | 'speaking' | 'idle';
-}
-```
-
-## Parsed Event Structure
-
-When parsed, events have the following structure:
-
-```typescript
-interface AgentEvent {
-  type: string;      // The event type (e.g., "thinking", "speaking", "tool")
-  timestamp: number; // Unix timestamp in milliseconds
-  data: unknown;     // The parsed JSON payload
-}
-```
-
-## Usage
-
-### Parsing Events
-
-```typescript
-import { parseAgentEvent } from '../scripts/hermes-livekit-events';
-
-const raw = 'agent:thinking {"thought": "Processing..."}';
-const event = parseAgentEvent(raw);
-console.log(event);
-// { type: 'thinking', timestamp: 1715321234567, data: { thought: 'Processing...' } }
-```
-
-### Capturing Events
-
-```typescript
-import { captureHermesLiveKitEvents } from '../scripts/hermes-livekit-events';
-
-const events = await captureHermesLiveKitEvents();
-events.forEach(event => {
-  console.log(`${event.type}:`, event.data);
-});
-```
-
-## Consumer Expectations
-
-Web overlays and other consumers should:
-
-1. **Parse events in real-time** as they arrive from the gateway
-2. **Display lifecycle state** (thinking, speaking, idle) to show Hermes activity
-3. **Render captions** from `agent:speaking` events
-4. **Show tool calls** from `agent:tool` events for transparency
-5. **Handle malformed events** gracefully (fallback to raw string)
-
-## Future Extensions
-
-Additional event types may be added as the Hermes LiveKit integration evolves:
-- `agent:caption` - Pre-formatted caption text
-- `hermes.error` - Error states and recovery
-- `hermes.audio` - Audio metadata for TTS playback
+Implementation: `vendor/hermes-agent-livekit/gateway/platforms/livekit.py` — `async def _publish_agent_event` (JSON envelope + `publish_data`).

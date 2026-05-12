@@ -41,6 +41,16 @@ cd vendor/hermes-agent-livekit
 python3 gateway/run.py
 ```
 
+## M1 smoke runner (real LiveKit)
+
+End-to-end operator check (requires real `LIVEKIT_*` credentials in your environment; nothing secret is echoed):
+
+```bash
+bash scripts/m1-hermes-livekit-smoke.sh
+```
+
+Optional: `M1_SMOKE_RUN_SECS` (default 45) controls how long the gateway stays up before the script stops it. Logs go under `scratchpad/m1-smoke-logs/` unless `M1_SMOKE_LOG_DIR` is set. Hermes config is isolated under `scratchpad/m1-smoke-hermes-config/` via `HERMES_CONFIG_DIR` unless you override it.
+
 ## Smoke Check
 
 Run the smoke check to verify dependencies:
@@ -86,5 +96,5 @@ When the Hermes gateway starts successfully:
 
 ## Next Steps
 
-- M1.3: Capture and document actual `agent:*` event payloads from the Hermes gateway
+- Event contract: `docs/hermes-livekit-event-contract.md`
 - M2: Build the LiveKit avatar web stage
