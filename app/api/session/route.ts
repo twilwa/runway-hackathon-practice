@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { startSession, stopSession, getSessionStatus } from '../../scripts/session-orchestration';
+import { startSession, stopSession, getSessionStatus } from '../../../scripts/session-orchestration';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

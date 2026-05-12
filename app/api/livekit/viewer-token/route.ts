@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createLiveKitViewerToken } from '../../../src/livekit/token';
+import { createLiveKitViewerToken } from '../../../../src/livekit/token';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
