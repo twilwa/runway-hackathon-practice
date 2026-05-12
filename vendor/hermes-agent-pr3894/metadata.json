@@ -1,0 +1,13 @@
+{
+  "name": "hermes-agent-livekit-pr3894",
+  "source_pr": "https://github.com/NousResearch/hermes-agent/pull/3894",
+  "base": "origin/main",
+  "base_commit": "a2920b17623e2903bd9481721f60c2bf26c6f97a",
+  "base_short": "a2920b176",
+  "pr_ref": "scratch/pr-3894-livekit",
+  "pr_commit": "1a4ddb466ffd37fc8ea78754d654fa236cab1b0d",
+  "pr_short": "1a4ddb466",
+  "merge_status": "clean --no-commit merge against origin/main",
+  "local_vendor_copy": "vendor/hermes-agent-livekit",
+  "portable_patch": "vendor/hermes-agent-pr3894/pr3894-livekit-merge.patch"
+}
