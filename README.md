@@ -82,3 +82,49 @@ trunk fmt
 - `br` is the repo-local execution log; `linctl` is for team/human reporting.
 - Bootstrap installs repo tools, but language/runtime choices should be managed through `mise` rather than ad-hoc installers.
 - Use `scratchpad/` for temporary artifacts and `docs/` for durable documentation.
+
+## Hermes Runway Avatar Companion MVP
+
+This repo also contains a local Next.js MVP for a Hermes/Runway avatar companion page.
+
+The app opens a Runway Character WebRTC call in a browser. Use it by screen-sharing the browser window into Discord while Hermes uses the existing Discord voice path for audio.
+
+### Setup
+
+```bash
+cp .env.example .env.local
+# Fill RUNWAYML_API_SECRET in .env.local, or source the Hermes profile env before running.
+bun install
+bun run dev
+```
+
+Then open http://localhost:3000 and click **Start / reconnect avatar call**.
+
+### Existing MVP avatar
+
+`NEXT_PUBLIC_RUNWAY_AVATAR_ID=6824a3e0-f37f-455a-b1d4-3140111a83bf`
+
+This is a non-secret Runway avatar UUID for the Hermes companion created from the supplied inspo image.
+
+### Discord flow
+
+1. Start this app locally.
+2. Open the page in a browser.
+3. Start/reconnect the avatar call.
+4. Screen-share the browser window into Discord.
+5. Use Hermes's existing Discord `/voice join` flow for listening/speaking.
+
+### Checks
+
+```bash
+bun run typecheck
+bun run build
+bun test
+```
+
+### Notes
+
+- The Runway API key stays server-side. Do not create `NEXT_PUBLIC_*` secrets.
+- Runway realtime avatar sessions are one-time credentials and last about 5 minutes; reconnect when they end.
+- This MVP intentionally does not attempt Discord bot-controlled live video or screen-share automation.
+
