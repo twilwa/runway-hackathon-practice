@@ -147,6 +147,11 @@ vite.config.ts.timestamp-*
 scratchpad/*
 !scratchpad/.gitkeep
 
+# Local full copy of Hermes PR #3894 materialized from vendor/hermes-agent-pr3894.
+# Keep the portable patch/metadata tracked instead of committing a full monorepo copy.
+vendor/hermes-agent-livekit/
+.env.local
+
 # Bootstrap runtime data
 .mise/
 .tools/
