@@ -10,7 +10,11 @@ This document describes how to use the Hermes LiveKit transport spike for the ha
    ```
 
 2. **Install dependencies:**
-   - Python 3
+   - Python 3 and [uv](https://github.com/astral-sh/uv) (recommended)
+   - In the vendored tree, install Hermes **with the LiveKit extra** (pulls `livekit` / `livekit-api`):
+     ```bash
+     cd vendor/hermes-agent-livekit && uv sync --extra livekit
+     ```
    - ffmpeg
    - LiveKit credentials
 
@@ -43,11 +47,13 @@ python3 gateway/run.py
 
 ## M1 smoke runner (real LiveKit)
 
-End-to-end operator check (requires real `LIVEKIT_*` credentials in your environment; nothing secret is echoed):
+End-to-end operator check. The script **loads `.env.local` then `.env` from the repo root** (same convention as Next.js), so you do not need to `export` variables manually. Nothing secret is echoed (only `[SET]` / `[MISSING]` for keys).
 
 ```bash
 bash scripts/m1-hermes-livekit-smoke.sh
 ```
+
+The gateway process uses `vendor/hermes-agent-livekit/.venv/bin/python` when that venv exists (after `uv sync --extra livekit`).
 
 Optional: `M1_SMOKE_RUN_SECS` (default 45) controls how long the gateway stays up before the script stops it. Logs go under `scratchpad/m1-smoke-logs/` unless `M1_SMOKE_LOG_DIR` is set. Hermes config is isolated under `scratchpad/m1-smoke-hermes-config/` via `HERMES_CONFIG_DIR` unless you override it.
 
