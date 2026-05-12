@@ -100,6 +100,9 @@ When the Hermes gateway starts successfully:
 - Verify your LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and LIVEKIT_URL are correct
 - Ensure the LiveKit room exists and you have permission to join
 
+**`ModuleNotFoundError: No module named 'livekit'`:**
+- Run `cd vendor/hermes-agent-livekit && uv sync --extra livekit` so the project venv includes the LiveKit SDK.
+
 ## Next Steps
 
 - Event contract: `docs/hermes-livekit-event-contract.md`
