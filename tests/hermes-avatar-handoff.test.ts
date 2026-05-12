@@ -7,7 +7,7 @@ describe('decideHandoffMethod', () => {
       runwaySupportsExternalAudio: true,
       hermesHasTTSArtifact: false,
     });
-    expect(result.method).toBe('text-to-avatar');
+    expect(result.method.type).toBe('text-to-avatar');
   });
 
   it('chooses TTS-mirroring when Hermes has TTS artifact', async () => {
@@ -15,7 +15,7 @@ describe('decideHandoffMethod', () => {
       runwaySupportsExternalAudio: false,
       hermesHasTTSArtifact: true,
     });
-    expect(result.method).toBe('tts-mirroring');
+    expect(result.method.type).toBe('tts-mirroring');
   });
 
   it('falls back to direct-text when neither option available', async () => {
@@ -23,7 +23,7 @@ describe('decideHandoffMethod', () => {
       runwaySupportsExternalAudio: false,
       hermesHasTTSArtifact: false,
     });
-    expect(result.method).toBe('direct-text');
+    expect(result.method.type).toBe('direct-text');
   });
 
   it('prefers text-to-avatar when both options available', async () => {
@@ -31,7 +31,7 @@ describe('decideHandoffMethod', () => {
       runwaySupportsExternalAudio: true,
       hermesHasTTSArtifact: true,
     });
-    expect(result.method).toBe('text-to-avatar');
+    expect(result.method.type).toBe('text-to-avatar');
   });
 });
 

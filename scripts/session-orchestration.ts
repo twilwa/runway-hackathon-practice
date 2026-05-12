@@ -90,10 +90,10 @@ export async function stopSession(sessionId: string): Promise<StopResult> {
   const session = sessions.get(sessionId);
 
   if (!session) {
+    // Idempotent: stopping an unknown or already-removed session is a no-op success.
     return {
-      success: false,
-      cleanedUp: false,
-      error: 'Session not found',
+      success: true,
+      cleanedUp: true,
     };
   }
 
