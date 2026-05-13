@@ -161,3 +161,6 @@ vendor/hermes-agent-livekit/
 scratchpad/*
 !scratchpad/.gitkeep
 # End bootstrap runtime data
+
+# bv (beads viewer) local config and caches
+.bv/
